@@ -16,16 +16,16 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/groups/public/")
-    maven("https://repo.codemc.org/repository/maven-public/")
+    maven("https://maven.playpro.com")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("dev.jorel:commandapi-bukkit-shade:9.0.3")
+    implementation("io.github.monun:kommand-core:3.1.7")
 
-    compileOnly("dev.jorel:commandapi-bukkit-core:9.0.3")
+    compileOnly("net.coreprotect:coreprotect:21.3")
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
 }
 
@@ -42,7 +42,6 @@ tasks {
     withType<Javadoc>() {
         options.encoding = "UTF-8"
     }
-
 
     processResources {
         filesMatching("plugin.yml") {
