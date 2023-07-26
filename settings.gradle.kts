@@ -1,1 +1,1 @@
-rootProject.name = "kotlin-bukkit-template"
+rootProject.name = "canibuildhere"

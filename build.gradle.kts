@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.8.21"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = property("group")!!
@@ -14,24 +15,34 @@ java.toolchain {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://hub.spigotmc.org/nexus/content/groups/public/")
+    maven("https://repo.codemc.org/repository/maven-public/")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("io.github.monun:kommand-api:3.1.3")
-    implementation("net.projecttl:InventoryGUI-api:4.4.1")
-    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
 
-    compileOnly("org.mariadb.jdbc:mariadb-java-client:3.1.2")
-    compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
+    implementation("dev.jorel:commandapi-bukkit-shade:9.0.3")
+
+    compileOnly("dev.jorel:commandapi-bukkit-core:9.0.3")
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
 }
 
 tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+        kotlinOptions.javaParameters = true
     }
+
+    withType<JavaCompile>() {
+        options.encoding = "UTF-8"
+    }
+
+    withType<Javadoc>() {
+        options.encoding = "UTF-8"
+    }
+
 
     processResources {
         filesMatching("plugin.yml") {
@@ -39,10 +50,16 @@ tasks {
         }
     }
 
-    create<Jar>("paperJar") {
+    shadowJar {
         archiveBaseName.set(rootProject.name)
         archiveClassifier.set("")
         archiveVersion.set("")
+
+        dependencies {
+            include(dependency("dev.jorel:commandapi-bukkit-shade:9.0.3"))
+        }
+
+        relocate("dev.jorel.commandapi", "dev.groovin.canibuildhere.commandapi")
 
         from(sourceSets["main"].output)
     }
