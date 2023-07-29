@@ -16,6 +16,7 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/groups/public/")
+    maven("https://repo.glaremasters.me/repository/bloodshot/")
     maven("https://maven.playpro.com")
 }
 
@@ -25,8 +26,9 @@ dependencies {
 
     implementation("io.github.monun:kommand-core:3.1.7")
 
+    compileOnly("com.griefdefender:api:2.1.0-SNAPSHOT")
     compileOnly("net.coreprotect:coreprotect:21.3")
-    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20.0-R0.1-SNAPSHOT")
 }
 
 tasks {

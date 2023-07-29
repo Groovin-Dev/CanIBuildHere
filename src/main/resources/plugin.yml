@@ -5,6 +5,4 @@ main: ${plugin_main}
 libraries:
   - io.github.monun:kommand-core:3.1.7
 
-depend: [CoreProtect]
-
-softdepend: [GriefDefender]
+depend: [CoreProtect, GriefDefender]

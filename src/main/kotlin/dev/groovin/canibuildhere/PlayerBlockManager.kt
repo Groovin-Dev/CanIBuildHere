@@ -1,4 +1,5 @@
-import dev.groovin.canibuildhere.BuildDetectorEngine
+package dev.groovin.canibuildhere
+
 import net.coreprotect.CoreProtect
 import net.coreprotect.CoreProtectAPI
 import net.coreprotect.CoreProtectAPI.ParseResult
@@ -10,8 +11,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
-
-data class Build(val player: Player, var size: Int, val location: Location)
 
 class PlayerBlockManager {
     // Code to get CoreProtect
@@ -41,29 +40,28 @@ class PlayerBlockManager {
         }
     }
 
-    // Method that determines if player is near player blocks
-    fun isPlayerNearPlayerBlocks(player: Player): Boolean {
+    fun getNearbyBuilds(player: Player): List<Build> {
         val api = getCoreProtect() ?: throw Exception("CoreProtect is not loaded")
         val parsedLookup = lookupBlockChangesNearPlayer(api, player)
         val buildDetectorEngine = BuildDetectorEngine(10, 1.0)
-        val builds = buildDetectorEngine.detectBuilds(parsedLookup, player)
 
-        if (builds.isNotEmpty()) {
-            notifyUser(player, builds)
-        }
-
-        return builds.isNotEmpty()
+        return buildDetectorEngine.detectBuilds(parsedLookup, player)
     }
 
-    // Function to look up block changes near the player
     private fun lookupBlockChangesNearPlayer(api: CoreProtectAPI, player: Player): List<ParseResult> {
+        // It's stupid that I have to do this, but for some reason the API doesn't like a null time value
+        // even though you don't have to provide one in the command. Maybe I'm just stupid tho lol
         val year = (60 * 60 * 24) * 365
+        val decade = year * 10
         val restrictedBlocks = listOf(Material.DIRT, Material.GRASS_BLOCK, Material.GRASS, Material.STONE, Material.COBBLESTONE)
         val actions = mutableListOf(0, 1) // Block placement and block break
 
         // Search for all block changes near the player
+        // For now I am just using a radius of 100 blocks. It's the max that CoreProtect allows but I could break it
+        // into 4 quadrants and do 4 lookups to get a larger area.
+        // TODO: Break into quadrants to get a larger area
         val lookup: List<Array<String?>> =
-            api.performLookup(year, null, null, null, restrictedBlocks, actions, 100, player.location)
+            api.performLookup(decade, null, null, null, restrictedBlocks, actions, 100, player.location)
 
         val filteredLookup = lookup.filter { it[1]?.startsWith("#") == false }
         val parsedLookup: List<ParseResult> = filteredLookup.map { api.parseResult(it) }
@@ -76,7 +74,6 @@ class PlayerBlockManager {
         return filteredBlocks
     }
 
-    // Function to filter placed blocks
     private fun filterPlacedBlocks(parsedLookup: List<ParseResult>, worldName: String): List<ParseResult> {
         return parsedLookup.filter { result ->
             val location =
@@ -86,8 +83,7 @@ class PlayerBlockManager {
         }
     }
 
-    // Function to notify the user
-    private fun notifyUser(player: Player, builds: List<dev.groovin.canibuildhere.Build>) {
+    fun notifyUser(player: Player, builds: List<Build>) {
         val buildCount = Component.text(builds.size, NamedTextColor.YELLOW, TextDecoration.BOLD)
         val builders = builds.map { it.player }.distinct().joinToString(", ")
         val builderComponent = Component.text(builders, NamedTextColor.BLUE, TextDecoration.BOLD)
